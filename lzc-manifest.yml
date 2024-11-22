@@ -1,0 +1,52 @@
+lzc-sdk-version: 0.1
+name: wallabag
+package: cloud.lazycat.app.wallabag
+version: 2.6.10
+description: 
+license: https://choosealicense.com/licenses/mit/
+homepage:
+author:
+application:
+  subdomain: wallabag
+  public_path:
+    - /
+  routes:
+    - /=http://wallabag.cloud.lazycat.app.wallabag.lzcapp:80
+  background_task: true
+  ingress:
+    - protocol: tcp
+      port: 80
+      service: wallabag
+services:
+  wallabag:
+    image: registry.lazycat.cloud/einverne/wallabag/wallabag:2.6.10
+    environment:
+      - MYSQL_ROOT_PASSWORD=LAZYCAT
+      - SYMFONY__ENV__DATABASE_DRIVER=pdo_mysql
+      - SYMFONY__ENV__DATABASE_HOST=mysql
+      - SYMFONY__ENV__DATABASE_PORT=3306
+      - SYMFONY__ENV__DATABASE_NAME=LAZYCAT
+      - SYMFONY__ENV__DATABASE_USER=LAZYCAT
+      - SYMFONY__ENV__DATABASE_PASSWORD=LAZYCAT
+      - SYMFONY__ENV__DATABASE_CHARSET=utf8mb4
+      - SYMFONY__ENV__DATABASE_TABLE_PREFIX="wallabag_"
+      - SYMFONY__ENV__MAILER_DSN=smtp://127.0.0.1
+      - SYMFONY__ENV__FROM_EMAIL=wallabag@example.com
+      - SYMFONY__ENV__DOMAIN_NAME=https://${LAZYCAT_APP_DOMAIN}
+      - SYMFONY__ENV__SERVER_NAME="Your wallabag instance"
+    ports:
+      - "80"
+    volumes:
+      - /lzcapp/var/wallabag/images:/var/www/wallabag/web/assets/images
+    depends_on:
+      - mysql
+      - redis
+  mysql:
+    image: registry.lazycat.cloud/einverne/mysql:9.1.0
+    environment:
+      - MYSQL_ROOT_PASSWORD=LAZYCAT
+      - MYSQL_DATABASE=LAZYCAT
+      - MYSQL_USER=LAZYCAT
+      - MYSQL_PASSWORD=LAZYCAT
+  redis:
+    image: registry.lazycat.cloud/redis:alpine
